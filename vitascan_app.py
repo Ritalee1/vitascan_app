@@ -4,8 +4,9 @@ import librosa
 import joblib
 import os
 import soundfile as sf
+from pathlib import Path
 
-# Set page configuration
+# === Page configuration ===
 st.set_page_config(
     page_title="VitaScan™",
     page_icon="🧠",
@@ -13,15 +14,17 @@ st.set_page_config(
 )
 
 # === Branding with Logo and Title ===
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col2:
-    st.image("logo.png", width=100)
-    st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>VitaScan™</h1>", unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: center;'>AI-Powered Respiratory Screening</h4>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>🗣️ Listen to your health. Detect early. Act wisely.</p>", unsafe_allow_html=True)
-
-)
+logo_path = "logo.png"
+if Path(logo_path).is_file():
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image(logo_path, width=100)
+        st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>VitaScan™</h1>", unsafe_allow_html=True)
+        st.markdown("<h4 style='text-align: center;'>AI-Powered Respiratory Screening</h4>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center;'>🗣️ Listen to your health. Detect early. Act wisely.</p>", unsafe_allow_html=True)
+else:
+    st.title("🧠 VitaScan™ – Cough Audio Screening")
+    st.subheader("AI-Powered Respiratory Screening")
 
 # === Vision Statement ===
 st.markdown("""
@@ -34,8 +37,13 @@ st.markdown("Upload a short **cough recording** in `.wav` format to receive an i
 # === File Upload ===
 uploaded_file = st.file_uploader("📁 Upload your cough.wav file", type=["wav"])
 
-# === Load Model ===
-model = joblib.load("C:/Users/Rita/Desktop/DSA/vitascan_model.pkl")
+# === Load Trained Model ===
+model_path = "C:/Users/Rita/Desktop/DSA/vitascan_model.pkl"
+if not os.path.exists(model_path):
+    st.error("❌ Model file not found. Please ensure 'vitascan_model.pkl' is in the correct directory.")
+    st.stop()
+
+model = joblib.load(model_path)
 
 # === Feature Extraction Function ===
 def extract_features(file_path):
@@ -48,6 +56,7 @@ def extract_features(file_path):
         centroid = np.mean(librosa.feature.spectral_centroid(y=y, sr=sr)[0])
         return np.append(np.mean(mfcc.T, axis=0), [zcr, centroid])
     except Exception as e:
+        st.error(f"⚠️ Feature extraction failed: {e}")
         return None
 
 # === Run Prediction ===
@@ -62,15 +71,18 @@ if uploaded_file is not None:
     if features is None:
         st.error("❌ Could not process the audio. Please upload a clearer `.wav` cough file.")
     else:
-        X_input = features.reshape(1, -1)
-        prediction = model.predict(X_input)[0]
-        probas = model.predict_proba(X_input)[0]
+        try:
+            X_input = features.reshape(1, -1)
+            prediction = model.predict(X_input)[0]
+            probas = model.predict_proba(X_input)[0]
 
-        st.success(f"🩺 Prediction: **{prediction.upper()}**")
-        st.markdown("### 📊 Model Confidence")
-        for label, prob in zip(model.classes_, probas):
-            st.write(f"- **{label.capitalize()}**: `{prob*100:.2f}%`")
-        st.progress(int(probas[np.argmax(probas)] * 100))
+            st.success(f"🩺 Prediction: **{prediction.upper()}**")
+            st.markdown("### 📊 Model Confidence")
+            for label, prob in zip(model.classes_, probas):
+                st.write(f"- **{label.capitalize()}**: `{prob*100:.2f}%`")
+            st.progress(int(probas[np.argmax(probas)] * 100))
+        except Exception as e:
+            st.error(f"⚠️ Model prediction failed: {e}")
 
     os.remove(temp_path)
 
