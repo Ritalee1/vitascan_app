@@ -16,10 +16,9 @@ st.set_page_config(
 # === Branding with Centered Logo and Titles ===
 logo_path = "logo.png"
 if Path(logo_path).is_file():
-    st.markdown(
-        f"<div style='text-align: center;'><img src='{logo_path}' width='100'></div>",
-        unsafe_allow_html=True
-    )
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image(logo_path, width=100)
 
 st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>VitaScan™</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>AI-Powered Respiratory Screening</h4>", unsafe_allow_html=True)
