@@ -3,28 +3,42 @@ import numpy as np
 import librosa
 import joblib
 import os
-import soundfile as sf  # For audio preview
+import soundfile as sf
 
-# Page config
+# Set page configuration
 st.set_page_config(
     page_title="VitaScan™",
     page_icon="🧠",
-    layout="centered",
-    initial_sidebar_state="auto"
+    layout="centered"
 )
 
-# Load model
+# === App Branding and Logo ===
+st.markdown(
+    """
+    <div style='text-align: center;'>
+        <img src='logo.png' width='100'>
+        <h1 style='color:#FF4B4B;'>VitaScan™</h1>
+        <h4>AI-Powered Respiratory Screening</h4>
+        <p style='font-size:16px;'>🗣️ Listen to your health. Detect early. Act wisely.</p>
+    </div>
+    """, unsafe_allow_html=True
+)
+
+# === Vision Statement ===
+st.markdown("""
+> 🩺 **Vision**: To empower early detection of respiratory illnesses through AI-powered voice screening — making diagnostics more accessible, non-invasive, and scalable for communities worldwide.
+""")
+
+# === Upload Instructions ===
+st.markdown("Upload a short **cough recording** in `.wav` format to receive an instant health screening.")
+
+# === File Upload ===
+uploaded_file = st.file_uploader("📁 Upload your cough.wav file", type=["wav"])
+
+# === Load Model ===
 model = joblib.load("C:/Users/Rita/Desktop/DSA/vitascan_model.pkl")
 
-# Header
-st.markdown("<h1 style='text-align: center; color: #FF4B4B;'>🧠 VitaScan™</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align: center;'>Cough Audio Screening App</h3>", unsafe_allow_html=True)
-st.write("Upload a **cough recording** (.wav) to screen for possible respiratory illness.")
-
-# Upload
-uploaded_file = st.file_uploader("Upload your cough.wav file", type=["wav"])
-
-# Feature extraction
+# === Feature Extraction Function ===
 def extract_features(file_path):
     try:
         y, sr = librosa.load(file_path, sr=16000)
@@ -37,9 +51,8 @@ def extract_features(file_path):
     except Exception as e:
         return None
 
-# Prediction
+# === Run Prediction ===
 if uploaded_file is not None:
-    # Save file
     temp_path = "temp_cough.wav"
     with open(temp_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -48,24 +61,34 @@ if uploaded_file is not None:
 
     features = extract_features(temp_path)
     if features is None:
-        st.error("❌ Could not process audio. Try a different recording.")
+        st.error("❌ Could not process the audio. Please upload a clearer `.wav` cough file.")
     else:
         X_input = features.reshape(1, -1)
         prediction = model.predict(X_input)[0]
         probas = model.predict_proba(X_input)[0]
 
         st.success(f"🩺 Prediction: **{prediction.upper()}**")
-        st.progress(int(probas[np.argmax(probas)] * 100))
-
-        st.markdown("### 📊 Confidence")
+        st.markdown("### 📊 Model Confidence")
         for label, prob in zip(model.classes_, probas):
             st.write(f"- **{label.capitalize()}**: `{prob*100:.2f}%`")
+        st.progress(int(probas[np.argmax(probas)] * 100))
 
     os.remove(temp_path)
 
-# Footer
+# === Roadmap / What’s Next Section ===
+st.markdown("---")
+st.markdown("## 🛠️ What’s Next for VitaScan™")
+st.markdown("""
+- ✅ Add real-time cough classification with deep learning (CNN/LSTM)
+- 🌍 Deploy on Streamlit Cloud for public access
+- 📱 Create a mobile-friendly version
+- 🧪 Expand dataset for broader conditions (e.g. TB, asthma, Parkinson’s)
+- 🔒 Add basic authentication for private use
+""")
+
+# === Footer ===
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center;'>Made with ❤️ by <strong>Ritalee Monde</strong> • VitaScan™ 2025</p>",
+    "<p style='text-align: center;'>Made with ❤️ by <strong>Ritalee Monde</strong><br>VitaScan™ 2025 • AI for Public Health</p>",
     unsafe_allow_html=True
 )
