@@ -54,7 +54,8 @@ librosa
 scikit-learn
 joblib
 numpy
-🤖 Model Information
+
+## 🤖 Model Information
 The VitaScan model is trained on audio features from labeled cough datasets. It uses:
 
 MFCCs (Mel-frequency cepstral coefficients) for timbre and tone
@@ -71,16 +72,16 @@ positive (merged from multiple positive subtypes)
 
 Accuracy is best on balanced datasets. Ideal for prototyping and early research use.
 
-👩‍💻 Creator
+## 👩‍💻 Creator
 Ritalee Monde
 Public Health + AI Innovator
 💡 Building AI-powered healthtech solutions for impact.
 📫 https://www.linkedin.com/in/ritalee-pamela-monde-990816142
 
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 This tool is for experimental and educational purposes only.
 VitaScan™ is not a medical diagnostic tool and should not be used to replace clinical testing or professional healthcare advice.
 
-📜 License
+## 📜 License
 MIT License – Free to use, modify, and distribute.
 Please credit the original creator if you build upon this work.
