@@ -4,6 +4,7 @@ import librosa
 import joblib
 import os
 import soundfile as sf
+import requests
 from pathlib import Path
 
 # === Page configuration ===
@@ -31,13 +32,26 @@ st.markdown("Upload a short **cough recording** in `.wav` format to receive an i
 # === File Upload ===
 uploaded_file = st.file_uploader("📁 Upload your cough.wav file", type=["wav"])
 
-# === Load Trained Model ===
-model_path = "C:/Users/Rita/Desktop/DSA/vitascan_model.pkl"
-if not os.path.exists(model_path):
-    st.error("❌ Model file not found. Please ensure 'vitascan_model.pkl' is in the correct directory.")
-    st.stop()
+# === Load Trained Model from Google Drive if needed ===
+model_url = "https://drive.google.com/uc?export=download&id=1MhGrd7M4QP0ofAgrtcG3nXSiYvjsGwqi"
+model_path = "vitascan_model.pkl"
 
-model = joblib.load(model_path)
+if not os.path.exists(model_path):
+    try:
+        with open(model_path, "wb") as f:
+            response = requests.get(model_url)
+            f.write(response.content)
+        st.success("✅ Model downloaded successfully from Google Drive.")
+    except Exception as e:
+        st.error(f"❌ Failed to download model: {e}")
+        st.stop()
+
+# === Load model ===
+try:
+    model = joblib.load(model_path)
+except Exception as e:
+    st.error(f"❌ Failed to load model: {e}")
+    st.stop()
 
 # === Feature Extraction Function ===
 def extract_features(file_path):
