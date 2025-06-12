@@ -21,7 +21,7 @@ Upload a short `.wav` cough audio and VitaScan will:
 ## 🚀 Run Locally
 
 ```bash
-git clone https://github.com/your-username/vitascan-app.git
+git clone https://github.com/Ritalee1/vitascan_app
 cd vitascan-app
 pip install -r requirements.txt
 streamlit run vitascan_app.py
